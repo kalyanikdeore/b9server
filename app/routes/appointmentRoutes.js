@@ -4,8 +4,8 @@ const { authenticate } = require("../middleware/authMiddleware");
 const router = express.Router();
 
 router.post("/create", authenticate, appointmentController.createAppointment);
-router.get("/list", appointmentController.getAppointments);
 router.get("/:id", appointmentController.getAppointmentById);
+router.get("/list", appointmentController.getAppointments);
 router.put("/:id", appointmentController.updateAppointment);
 router.delete("/delete/:id", appointmentController.deleteAppointment);
 

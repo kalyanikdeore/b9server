@@ -53,19 +53,19 @@ const Response = sequelize.define(
   }
 );
 
-// Response.associate = (models) => {
-//   Response.belongsTo(models.User, {
-//     foreignKey: "userId",
-//     as: "user",
-//   });
-//   Response.belongsTo(models.Question, {
-//     foreignKey: "questionId",
-//     as: "question",
-//   });
-//   Response.belongsTo(models.Appointment, {
-//     foreignKey: "appointment_id",
-//     as: "appointment",
-//   });
-// };
+Response.associate = (models) => {
+  Response.belongsTo(models.User, {
+    foreignKey: "userId",
+    as: "user",
+  });
+  Response.belongsTo(models.Question, {
+    foreignKey: "questionId",
+    as: "question",
+  });
+  Response.belongsTo(models.Appointment, {
+    foreignKey: "appointment_id",
+    as: "appointment",
+  });
+};
 
 module.exports = Response;

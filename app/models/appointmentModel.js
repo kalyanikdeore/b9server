@@ -33,21 +33,10 @@ const Appointment = sequelize.define(
     date: {
       type: DataTypes.DATEONLY,
       allowNull: false,
-      validate: {
-        isDate: true,
-        isAfter: new Date().toISOString().split("T")[0],
-      },
     },
     time: {
       type: DataTypes.TIME,
       allowNull: false,
-      validate: {
-        isValidTime(value) {
-          if (!/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) {
-            throw new Error("Time must be in HH:MM format");
-          }
-        },
-      },
     },
     email: {
       type: DataTypes.STRING,
@@ -83,15 +72,15 @@ const Appointment = sequelize.define(
   }
 );
 
-// Appointment.associate = (models) => {
-//   Appointment.belongsTo(models.User, {
-//     foreignKey: "created_by",
-//     as: "creator",
-//   });
-//   Appointment.hasMany(models.Response, {
-//     foreignKey: "appointment_id",
-//     as: "responses",
-//   });
-// };
+Appointment.associate = (models) => {
+  Appointment.belongsTo(models.User, {
+    foreignKey: "created_by",
+    as: "creator",
+  });
+  Appointment.hasMany(models.Response, {
+    foreignKey: "appointment_id",
+    as: "responses",
+  });
+};
 
 module.exports = Appointment;

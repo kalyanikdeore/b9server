@@ -65,15 +65,15 @@ const User = sequelize.define(
   }
 );
 
-// User.associate = (models) => {
-//   User.hasMany(models.Appointment, {
-//     foreignKey: "created_by",
-//     as: "appointments",
-//   });
-//   User.hasMany(models.Response, {
-//     foreignKey: "userId",
-//     as: "responses",
-//   });
-// };
+User.associate = (models) => {
+  User.hasMany(models.Appointment, {
+    foreignKey: "created_by",
+    as: "appointments",
+  });
+  User.hasMany(models.Response, {
+    foreignKey: "userId",
+    as: "responses",
+  });
+};
 
 module.exports = User;

@@ -31,16 +31,22 @@ module.exports = {
           ["date", "DESC"],
           ["time", "DESC"],
         ],
-      });
-
-      const appointmentIds = appointments.map((a) => a.id);
-      const responses = await Response.findAll({
-        where: { appointment_id: appointmentIds },
         include: [
           {
-            model: Question,
-            as: "question",
-            attributes: ["id", "category", "question_text", "dropdown_options"],
+            model: Response,
+            as: "responses",
+            include: [
+              {
+                model: Question,
+                as: "question",
+                attributes: [
+                  "id",
+                  "category",
+                  "question_text",
+                  "dropdown_options",
+                ],
+              },
+            ],
           },
         ],
       });
@@ -48,8 +54,7 @@ module.exports = {
       res.status(200).json({
         success: true,
         user,
-        appointments,
-        responses,
+        appointments, // Now each appointment will have its responses nested inside
       });
     } catch (error) {
       res.status(500).json({

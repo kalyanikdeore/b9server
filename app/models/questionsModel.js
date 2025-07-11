@@ -40,11 +40,11 @@ const Question = sequelize.define(
   }
 );
 
-// Question.associate = (models) => {
-//   Question.hasMany(models.Response, {
-//     foreignKey: "questionId",
-//     as: "responses",
-//   });
-// };
+Question.associate = (models) => {
+  Question.hasMany(models.Response, {
+    foreignKey: "questionId",
+    as: "responses",
+  });
+};
 
 module.exports = Question;
