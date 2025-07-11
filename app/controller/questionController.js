@@ -1,102 +1,127 @@
-// controllers/questionController.js
-
 const Question = require("../models/questionsModel");
 
-// Create a new question
-exports.createQuestion = async (req, res) => {
-  try {
-    // Ensure "Other" is always included
-    const dropdown_options = [
-      ...new Set([...req.body.dropdown_options, "Other"]),
-    ];
+module.exports = {
+  // Create new question
+  async createQuestion(req, res) {
+    try {
+      const {
+        category,
+        question_text,
+        dropdown_options,
+        display_order,
+        is_active,
+      } = req.body;
 
-    const question = await Question.create({
-      ...req.body,
-      dropdown_options,
-    });
+      const question = await Question.create({
+        category,
+        question_text,
+        dropdown_options,
+        display_order,
+        is_active,
+      });
 
-    res.status(201).json(question);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-// Get all questions
-exports.getAllQuestions = async (req, res) => {
-  try {
-    const questions = await Question.findAll({
-      order: [
-        ["category", "ASC"],
-        ["display_order", "ASC"],
-      ],
-    });
-    res.json(questions);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Get active questions
-exports.getActiveQuestions = async (req, res) => {
-  try {
-    const questions = await Question.findAll({
-      where: { is_active: true },
-      order: [
-        ["category", "ASC"],
-        ["display_order", "ASC"],
-      ],
-    });
-    res.json(questions);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Update a question
-exports.updateQuestion = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { dropdown_options, ...updateData } = req.body;
-
-    // Ensure "Other" is always included if updating options
-    const updatedOptions = dropdown_options
-      ? [...new Set([...dropdown_options, "Other"])]
-      : undefined;
-
-    const [updated] = await Question.update(
-      {
-        ...updateData,
-        ...(updatedOptions && { dropdown_options: updatedOptions }),
-      },
-      { where: { id } }
-    );
-
-    if (updated) {
-      const updatedQuestion = await Question.findByPk(id);
-      res.json(updatedQuestion);
-    } else {
-      res.status(404).json({ message: "Question not found" });
+      res.status(201).json({
+        success: true,
+        message: "Question created successfully",
+        question,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: error.message,
+      });
     }
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+  },
 
-// Delete a question (soft delete by setting is_active to false)
-exports.deleteQuestion = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const deleted = await Question.update(
-      { is_active: false },
-      { where: { id } }
-    );
+  // Get all questions
+  async getAllQuestions(req, res) {
+    try {
+      const questions = await Question.findAll({
+        order: [["display_order", "ASC"]],
+      });
 
-    if (deleted) {
-      res.json({ message: "Question deactivated successfully" });
-    } else {
-      res.status(404).json({ message: "Question not found" });
+      res.status(200).json({
+        success: true,
+        questions,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
     }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  },
+
+  // Get active questions only
+  async getActiveQuestions(req, res) {
+    try {
+      const questions = await Question.findAll({
+        where: { is_active: true },
+        order: [["display_order", "ASC"]],
+      });
+
+      res.status(200).json({
+        success: true,
+        questions,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  },
+
+  // Update question
+  async updateQuestion(req, res) {
+    try {
+      const question = await Question.findByPk(req.params.id);
+
+      if (!question) {
+        return res.status(404).json({
+          success: false,
+          message: "Question not found",
+        });
+      }
+
+      await question.update(req.body);
+
+      res.status(200).json({
+        success: true,
+        message: "Question updated successfully",
+        question,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  },
+
+  // Delete question
+  async deleteQuestion(req, res) {
+    try {
+      const question = await Question.findByPk(req.params.id);
+
+      if (!question) {
+        return res.status(404).json({
+          success: false,
+          message: "Question not found",
+        });
+      }
+
+      await question.destroy();
+
+      res.status(200).json({
+        success: true,
+        message: "Question deleted successfully",
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  },
 };

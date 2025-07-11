@@ -1,3 +1,4 @@
+// models/userModel.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../utils/db");
 
@@ -18,7 +19,7 @@ const User = sequelize.define(
       allowNull: false,
       unique: true,
       validate: {
-        isEmail: true, // Ensures valid email format
+        isEmail: true,
       },
     },
     password: {
@@ -29,26 +30,16 @@ const User = sequelize.define(
       type: DataTypes.ENUM("user", "admin", "superadmin"),
       defaultValue: "user",
     },
-
-    // Verification and Required documents of employee
     phone: {
       type: DataTypes.STRING(15),
       allowNull: true,
-      unique: true, // Ensures uniqueness only when not NULL
+      unique: true,
       validate: {
-        isNumeric: true, // Ensures only numeric values
+        isNumeric: true,
       },
     },
-    // alternate_phone: {
-    //   type: DataTypes.STRING(15),
-    //   allowNull: true, // Can be NULL
-    //   validate: {
-    //     isNumeric: true,
-    //   },
-    // },
-
     dob: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: true,
     },
     gender: {
@@ -59,16 +50,12 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    // address: {
-    //   type: DataTypes.TEXT,
-    //   allowNull: true,
-    // },
     reference_contacts: {
       type: DataTypes.JSONB,
-      allowNull: true, // Example: [{ name: "John", phone: "1234567890" }]
+      allowNull: true,
     },
     attachments: {
-      type: DataTypes.JSONB, // Example: [{ filename: "resume.pdf", url: "..." }]
+      type: DataTypes.JSONB,
       allowNull: true,
     },
   },
@@ -79,7 +66,14 @@ const User = sequelize.define(
 );
 
 // User.associate = (models) => {
-//   User.hasMany(models.Website, { foreignKey: "user_id", as: "websites" });
-//   User.hasMany(models.Token, { foreignKey: "userId", as: "tokens" });
+//   User.hasMany(models.Appointment, {
+//     foreignKey: "created_by",
+//     as: "appointments",
+//   });
+//   User.hasMany(models.Response, {
+//     foreignKey: "userId",
+//     as: "responses",
+//   });
 // };
+
 module.exports = User;

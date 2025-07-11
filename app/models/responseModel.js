@@ -1,8 +1,8 @@
-// models/response.js
+// models/responseModel.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../utils/db");
-const User = require("./userModel");
 const Question = require("./questionsModel");
+const User = require("./userModel");
 
 const Response = sequelize.define(
   "Response",
@@ -28,24 +28,44 @@ const Response = sequelize.define(
     },
     appointment_id: {
       type: DataTypes.INTEGER,
-      allowNull: true, // Optional if you want to link to appointments
+      allowNull: true,
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: User,
+        key: "id",
+      },
+    },
+    questionId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Question,
+        key: "id",
+      },
     },
   },
   {
-    tableName: "responses",
+    tableName: "Responses",
     timestamps: true,
   }
 );
 
-// Associations
-Response.belongsTo(User, {
-  foreignKey: "userId", // Matches your User model primary key
-  as: "user",
-});
-
-Response.belongsTo(Question, {
-  foreignKey: "questionId",
-  as: "question",
-});
+// Response.associate = (models) => {
+//   Response.belongsTo(models.User, {
+//     foreignKey: "userId",
+//     as: "user",
+//   });
+//   Response.belongsTo(models.Question, {
+//     foreignKey: "questionId",
+//     as: "question",
+//   });
+//   Response.belongsTo(models.Appointment, {
+//     foreignKey: "appointment_id",
+//     as: "appointment",
+//   });
+// };
 
 module.exports = Response;

@@ -63,28 +63,32 @@ const adminRoutes = require("./routes/adminRoutes");
 const appointmentRoutes = require("./routes/appointmentRoutes");
 const questionRoutes = require("./routes/questionRoutes");
 const responsesRoutes = require("./routes/responsesRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/appoint", appointmentRoutes);
 
 app.use("/api/v1/question", questionRoutes);
 app.use("/api/v1/responses", responsesRoutes);
+app.use("/api/v1/user", userRoutes);
 
 app.use("/api/v1/admin", adminRoutes);
-
 sequelize
   .authenticate()
-  .then(() => {
+  .then(async () => {
     console.log(
       "Connection to the database has been established successfully."
     );
-    return sequelize.sync({ alter: true });
-  })
-  .then(() => {
+
+    // Sync models in a specific order
+    await User.sync({ alter: true });
+    await Question.sync({ alter: true });
+    await Appointment.sync({ alter: true });
+    await Response.sync({ alter: true });
+    await Token.sync({ alter: true });
+
     console.log("Models have been synchronized with the database.");
-
-    const PORT = process.env.PORT;
-
+    const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
       console.log(`Server is Running on Port ${PORT}`);
     });

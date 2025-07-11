@@ -1,4 +1,4 @@
-// models/question.js
+// models/questionModel.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../utils/db");
 
@@ -35,9 +35,16 @@ const Question = sequelize.define(
     },
   },
   {
-    tableName: "questions",
+    tableName: "Questions",
     timestamps: true,
   }
 );
+
+// Question.associate = (models) => {
+//   Question.hasMany(models.Response, {
+//     foreignKey: "questionId",
+//     as: "responses",
+//   });
+// };
 
 module.exports = Question;

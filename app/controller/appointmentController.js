@@ -1,146 +1,183 @@
 const Appointment = require("../models/appointmentModel");
 const User = require("../models/userModel");
-// Create Appointment
-exports.createAppointment = async (req, res) => {
-  try {
-    console.log("Request Body:", req.body);
-    const {
-      firstName,
-      lastName,
-      city,
-      contact,
-      email,
-      dob,
-      gender,
-      doctor,
-      status,
-      created_by,
-      appointmentDate,
-      appointmentTime,
-    } = req.body;
-    console.log(
-      "Request Body:",
-      firstName,
-      lastName,
-      city,
-      contact,
-      email,
-      dob,
-      gender,
-      doctor,
-      status,
-      created_by,
-      appointmentDate,
-      appointmentTime
-    );
+const { Op } = require("sequelize");
 
-    const appointment = await Appointment.create({
-      firstName,
-      lastName,
-      city,
-      contact,
-      email,
-      dob,
-      gender,
-      doctor,
-      status,
-      created_by,
-      date: appointmentDate,
-      time: appointmentTime,
-    });
-    // console.log("Appointment created:", appointment);
+module.exports = {
+  // Create new appointment
+  async createAppointment(req, res) {
+    try {
+      const {
+        firstName,
+        lastName,
+        city,
+        contact,
+        email,
+        dob,
+        gender,
+        doctor,
+        status,
+        created_by,
+        date,
+        time,
+      } = req.body;
 
-    res.status(201).json({
-      success: true,
-      message: "Appointment created successfully",
-      data: appointment,
-    });
-  } catch (error) {
-    console.error("Error creating appointment:", error);
-    res.status(400).json({
-      success: false,
-      error: error.message || "Failed to create appointment",
-    });
-  }
-};
-exports.getAppointments = async (req, res) => {
-  try {
-    const { page = 1, limit = 10, status, search } = req.query;
-    const offset = (page - 1) * limit;
+      const appointment = await Appointment.create({
+        firstName,
+        lastName,
+        city,
+        contact,
+        email,
+        dob,
+        gender,
+        doctor,
+        status,
+        created_by,
+        date,
+        time,
+      });
 
-    const where = {};
-    if (status) where.status = status;
-
-    if (search) {
-      where[Op.or] = [
-        { firstName: { [Op.like]: `%${search}%` } },
-        { lastName: { [Op.like]: `%${search}%` } },
-        { email: { [Op.like]: `%${search}%` } },
-        { doctor: { [Op.like]: `%${search}%` } },
-      ];
+      res.status(201).json({
+        success: true,
+        message: "Appointment created successfully",
+        data: appointment,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: error.message || "Failed to create appointment",
+      });
     }
+  },
 
-    const { count, rows: appointments } = await Appointment.findAndCountAll({
-      where,
-      include: [
-        {
-          model: User,
-          as: "creator",
-          attributes: ["id", "username", "email"],
-        },
-      ],
-      order: [["createdAt", "DESC"]],
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-    });
+  // Get all appointments with pagination
+  async getAppointments(req, res) {
+    try {
+      const { page = 1, limit = 10, status, search } = req.query;
+      const offset = (page - 1) * limit;
 
-    res.status(200).json({
-      total: count,
-      page: parseInt(page),
-      totalPages: Math.ceil(count / limit),
-      appointments,
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-// Get Single Appointment
-exports.getAppointmentById = async (req, res) => {
-  try {
-    const appointment = await Appointment.findByPk(req.params.id);
-    if (!appointment) {
-      return res.status(404).json({ message: "Appointment not found" });
+      const where = {};
+      if (status) where.status = status;
+
+      if (search) {
+        where[Op.or] = [
+          { firstName: { [Op.iLike]: `%${search}%` } },
+          { lastName: { [Op.iLike]: `%${search}%` } },
+          { email: { [Op.iLike]: `%${search}%` } },
+          { doctor: { [Op.iLike]: `%${search}%` } },
+        ];
+      }
+
+      const { count, rows: appointments } = await Appointment.findAndCountAll({
+        where,
+        include: [
+          {
+            model: User,
+            as: "creator",
+            attributes: ["id", "username", "email"],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+      });
+
+      res.status(200).json({
+        success: true,
+        total: count,
+        page: parseInt(page),
+        totalPages: Math.ceil(count / limit),
+        appointments,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
     }
-    res.status(200).json(appointment);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+  },
 
-// Update Appointment
-exports.updateAppointment = async (req, res) => {
-  try {
-    const appointment = await Appointment.findByPk(req.params.id);
-    if (!appointment) {
-      return res.status(404).json({ message: "Appointment not found" });
-    }
-    await appointment.update(req.body);
-    res.status(200).json(appointment);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+  // Get single appointment by ID
+  async getAppointmentById(req, res) {
+    try {
+      const appointment = await Appointment.findByPk(req.params.id, {
+        include: [
+          {
+            model: User,
+            as: "creator",
+            attributes: ["id", "username", "email"],
+          },
+        ],
+      });
 
-// Delete Appointment
-exports.deleteAppointment = async (req, res) => {
-  try {
-    const appointment = await Appointment.findByPk(req.params.id);
-    if (!appointment) {
-      return res.status(404).json({ message: "Appointment not found" });
+      if (!appointment) {
+        return res.status(404).json({
+          success: false,
+          message: "Appointment not found",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        appointment,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
     }
-    await appointment.destroy();
-    res.status(200).json({ message: "Appointment deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  },
+
+  // Update appointment
+  async updateAppointment(req, res) {
+    try {
+      const appointment = await Appointment.findByPk(req.params.id);
+
+      if (!appointment) {
+        return res.status(404).json({
+          success: false,
+          message: "Appointment not found",
+        });
+      }
+
+      await appointment.update(req.body);
+
+      res.status(200).json({
+        success: true,
+        message: "Appointment updated successfully",
+        appointment,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  },
+
+  // Delete appointment
+  async deleteAppointment(req, res) {
+    try {
+      const appointment = await Appointment.findByPk(req.params.id);
+
+      if (!appointment) {
+        return res.status(404).json({
+          success: false,
+          message: "Appointment not found",
+        });
+      }
+
+      await appointment.destroy();
+
+      res.status(200).json({
+        success: true,
+        message: "Appointment deleted successfully",
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  },
 };

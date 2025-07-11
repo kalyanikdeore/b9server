@@ -1,6 +1,7 @@
+// models/appointmentModel.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../utils/db");
-const User = require("./userModel"); // Import User model
+const User = require("./userModel");
 
 const Appointment = sequelize.define(
   "Appointment",
@@ -29,13 +30,12 @@ const Appointment = sequelize.define(
         isNumeric: true,
       },
     },
-
     date: {
       type: DataTypes.DATEONLY,
       allowNull: false,
       validate: {
         isDate: true,
-        isAfter: new Date().toISOString().split("T")[0], // Ensures date is not in the past
+        isAfter: new Date().toISOString().split("T")[0],
       },
     },
     time: {
@@ -49,7 +49,6 @@ const Appointment = sequelize.define(
         },
       },
     },
-
     email: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -58,7 +57,7 @@ const Appointment = sequelize.define(
       },
     },
     dob: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     doctor: {
@@ -84,6 +83,15 @@ const Appointment = sequelize.define(
   }
 );
 
-Appointment.belongsTo(User, { foreignKey: "created_by", as: "creator" });
+// Appointment.associate = (models) => {
+//   Appointment.belongsTo(models.User, {
+//     foreignKey: "created_by",
+//     as: "creator",
+//   });
+//   Appointment.hasMany(models.Response, {
+//     foreignKey: "appointment_id",
+//     as: "responses",
+//   });
+// };
 
 module.exports = Appointment;
